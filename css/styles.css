@@ -1,0 +1,27 @@
+body {
+  margin: 0;
+  padding: 0; }
+
+#map {
+  width: 100vw;
+  height: 100vh; }
+
+#legend {
+  background-color: white;
+  box-shadow: rgba(0, 0, 0, 0.29804) 0px 1px 4px -1px;
+  border-radius: 2px;
+  margin-right: 10px;
+  margin-bottom: 0;
+  padding: 5px;
+  list-style-type: none;
+  cursor: pointer; }
+  #legend li {
+    margin: 5px; }
+    #legend li img {
+      vertical-align: middle; }
+  #legend.collapsed {
+    text-align: center;
+    padding: 8px 0;
+    width: 28px; }
+
+/*# sourceMappingURL=styles.css.map */

@@ -1,0 +1,144 @@
+<?php
+
+class Map {
+    public static function generate() {
+        global $config;
+
+        $jsonPoints = json_encode(self::getPoints());
+        $jsonTypes = json_encode($config['types']);
+        $jsonSources = json_encode($config['sources']);
+
+        $legendItems = array();
+        foreach ($config['types'] as $type) {
+            $legendItems[] = '<li><img src="' . $type['legendIcon'] . '" style="width: ' . $type['legendSize'][0] . 'px; height: ' . $type['legendSize'][1] . 'px;"> <span>' . htmlentities($type['label']) . '</span></li>';
+        }
+        $legend = '<ul id="legend">' . implode('', $legendItems) . '</ul>';
+
+        $credit = '';
+        if (isset($config['credit']) && $config['credit']) {
+            $credit = '<div id="credit">' . $config['credit'] . '</div>';
+        }
+
+        $ret = <<<HTML
+<div id="map"></div>
+$legend
+$credit
+<script src="js/markerclusterer.js"></script>
+<script src="js/script.js"></script>
+<script>
+    var Map = {
+        types: $jsonTypes,
+        sources: $jsonSources,
+    };
+    
+    function toggleLegend() {
+        var legend = document.getElementById('legend');
+        
+        if (!legend.hasAttribute('data-content')) {
+            legend.setAttribute('data-content', legend.innerHTML);
+        }
+        
+        if (legend.className == 'collapsed') {
+            legend.className = '';
+            legend.innerHTML = legend.getAttribute('data-content');
+        } else {
+            legend.className = 'collapsed';
+            legend.innerHTML = '?';
+        }
+    }
+    
+    function initMap() {
+        Map.map = new google.maps.Map(document.getElementById('map'), {
+            zoom: {$config['map']['zoom']},
+            center: {
+                lat: {$config['map']['center']['latitude']},
+                lng: {$config['map']['center']['longitude']}
+            }
+        });
+        
+        var legend = document.getElementById('legend');
+        legend.onclick = toggleLegend;
+        Map.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(legend);
+        
+        var credit = document.getElementById('credit');
+        if (credit) {
+            Map.map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(credit);
+        }
+        
+        Map.infoWindow = new google.maps.InfoWindow({
+            maxWidth: 400
+        });
+        
+        var points = $jsonPoints;
+        var markers = points.map(processPoint);
+        new MarkerClusterer(Map.map, markers, {imagePath: 'img/clusters/m', maxZoom: 17});
+    }
+</script>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key={$config['map']['apiKey']}&language={$config['map']['language']}&region={$config['map']['region']}&callback=initMap"></script>
+HTML;
+
+        return $ret;
+    }
+
+    public static function getPoints() {
+        global $config;
+
+        $points = array();
+
+        foreach (array_keys($config['sources']) as $source) {
+            $points = array_merge($points, Spreadsheet::read($source));
+        }
+
+        self::dedupePoints($points);
+
+        return $points;
+    }
+
+    /**
+     * Makes sure no two points are too close (or exactly the same). Moves them
+     * by a bit if necessary.
+     *
+     * @param array $points
+     */
+    private static function dedupePoints(&$points) {
+        $positions = array();
+
+        foreach ($points as &$point) {
+            $lat = round($point[1], 5);
+            $long = round($point[2], 5);
+
+            $distance = 1; $direction = array(0, 0); $direction_index = 0;
+            while (isset($positions['p' . ($lat + $distance * $direction[0] * .00001)]['p' . ($long + $distance * $direction[1] * .00001)])) {
+                $direction_index++;
+                if ($direction_index == 9) {
+                    $distance++;
+                    $direction_index = 1;
+                }
+                switch ($direction_index) {
+                    case 0: $direction = array(0, 0); break;
+                    case 1: $direction = array(0, 1); break;
+                    case 2: $direction = array(1, 0); break;
+                    case 3: $direction = array(0, -1); break;
+                    case 4: $direction = array(-1, 0); break;
+                    case 5: $direction = array(1, 1); break;
+                    case 6: $direction = array(-1, 1); break;
+                    case 7: $direction = array(-1, -1); break;
+                    case 8: $direction = array(1, -1); break;
+                }
+            }
+
+            if ($direction_index > 0) {
+                $point[1] += ($distance * $direction[0] * .00001);
+                $point[2] += ($distance * $direction[1] * .00001);
+            }
+
+            $lat = round($point[1], 5);
+            $long = round($point[2], 5);
+            if (!isset($positions['p' . $lat])) {
+                $positions['p' . $lat] = array();
+            }
+            $positions['p' . $lat]['p' . $long] = TRUE;
+        }
+    }
+}

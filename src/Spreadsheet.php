@@ -75,7 +75,9 @@ class Spreadsheet {
     private function getSinglePoint($row) {
         global $config;
 
-        $main_fields = array('latitude', 'longitude', 'type', 'date');
+        $main_fields = array('Latitude', 'Longitude', 'Type', 'Date');
+        $main_fields = array_map(array('Translate', 't'), $main_fields);
+        $main_fields = array_map(array($this, 'toHeader'), $main_fields);
         $types_mapping = array();
         foreach ($config['types'] as $key => $value) {
             $types_mapping[$value['label']] = $key;
@@ -85,15 +87,15 @@ class Spreadsheet {
 
         foreach ($main_fields as $field) {
             switch ($field) {
-                case 'type':
+                case $this->toHeader(Translate::t('Type')):
                     if (!array_key_exists($row['gsx$' . $field]['$t'], $types_mapping)) {
                         return NULL;
                     }
 
                     $point[] = $types_mapping[$row['gsx$' . $field]['$t']];
                     break;
-                case 'latitude':
-                case 'longitude':
+                case $this->toHeader(Translate::t('Latitude')):
+                case $this->toHeader(Translate::t('Longitude')):
                     $point[] = doubleval($row['gsx$' . $field]['$t']);
                     break;
                 default:

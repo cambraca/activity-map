@@ -24,6 +24,14 @@ $config['map'] = array(
     'region' => 'US',
 );
 
+$config['translations'] = array(
+    'Search' => 'Buscar',
+    'Latitude' => 'Latitud',
+    'Longitude' => 'Longitud',
+    'Type' => 'Tipo',
+    'Date' => 'Fecha',
+);
+
 $config['types'] = array(
     'type_a' => array(
         'label' => 'Type A',

@@ -49,5 +49,6 @@ $config['sources'] = array(
         'spreadsheetId' => '', // Replace with Google Spreadsheet ID
         'label' => 'Sheet A',
         'logo' => 'img/sources/a.png',
+        'link' => 'http://www.example.com',
     ),
 );

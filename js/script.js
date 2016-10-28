@@ -12,7 +12,16 @@ function processPoint(point) {
 
     marker.addListener('click', function() {
         var content = $('<div/>');
-        content.append($('<img/>', {src: Map.sources[point[0]].logo}).css('height', '50px'));
+
+        var source;
+        if (typeof Map.sources[point[0]].logo !== 'undefined' && Map.sources[point[0]].logo)
+            source = $('<img/>', {src: Map.sources[point[0]].logo}).css('height', '50px');
+        else
+            source = $('<strong/>').text(Map.sources[point[0]].label);
+        if (typeof Map.sources[point[0]].link !== 'undefined' && Map.sources[point[0]].link)
+            source = source.wrap($('<a/>', {href: Map.sources[point[0]].link, target: '_blank'})).parent();
+
+        content.append(source);
 
         content.append($('<strong/>').text(point[4]).css({display: 'block', color: '#999999'}));
 

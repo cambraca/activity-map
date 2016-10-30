@@ -45,7 +45,7 @@ class Spreadsheet {
         $fields = array();
         foreach ($data['feed']['entry'] as $entry) {
             if (isset($entry['gsx$' . $this->toHeader(Translate::t('Field'))]['$t'])) {
-                $fields[$this->toHeader($entry['gsx$' . $this->toHeader(Translate::t('Field'))]['$t'])] = $entry['gsx$field']['$t'];
+                $fields[$this->toHeader($entry['gsx$' . $this->toHeader(Translate::t('Field'))]['$t'])] = $entry['gsx$' . $this->toHeader(Translate::t('Field'))]['$t'];
             }
         }
         return $fields;

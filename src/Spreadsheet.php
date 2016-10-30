@@ -98,6 +98,13 @@ class Spreadsheet {
                 case $this->toHeader(Translate::t('Longitude')):
                     $point[] = doubleval($row['gsx$' . $field]['$t']);
                     break;
+                case $this->toHeader(Translate::t('Date')):
+                    $date = $row['gsx$' . $field]['$t'];
+                    $endDateKey = 'gsx$' . $this->toHeader(Translate::t('End date'));
+                    if (isset($row[$endDateKey]['$t']) && $row[$endDateKey]['$t'])
+                        $date .= html_entity_decode(' &ndash; ') . $row[$endDateKey]['$t'];
+                    $point[] = $date;
+                    break;
                 default:
                     $point[] = $row['gsx$' . $field]['$t'];
             }

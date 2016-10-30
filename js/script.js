@@ -10,7 +10,12 @@ function processPoint(point) {
         title: Map.sources[point[0]].label
     });
 
-    marker.addListener('click', function() {
+    marker.searchData = $.friendly_id(point[4]); // Date
+    for (var key in point[5]) {
+        marker.searchData += ' ' + $.friendly_id(point[5][key]); // Extra data
+    }
+
+    marker.addListener('click', function () {
         var content = $('<div/>');
 
         var source;
@@ -43,4 +48,45 @@ function processPoint(point) {
     });
 
     return marker;
+}
+
+function toggleLegend() {
+    var legend = document.getElementById('legend');
+
+    if (!legend.hasAttribute('data-content')) {
+        legend.setAttribute('data-content', legend.innerHTML);
+    }
+
+    if (legend.className == 'collapsed') {
+        legend.className = '';
+        legend.innerHTML = legend.getAttribute('data-content');
+    } else {
+        legend.className = 'collapsed';
+        legend.innerHTML = '?';
+    }
+}
+
+
+function doSearch() {
+    var query = $.friendly_id(document.getElementById('search').value.trim());
+
+    var filteredMarkers = query ? window.allMarkers.filter(function (marker) {
+        return marker.searchData.indexOf(query) !== -1;
+    }) : window.allMarkers;
+
+    if ($('#search').hasClass('empty') && filteredMarkers.length > 0)
+        $('#search').removeClass('empty');
+    else if (!$('#search').hasClass('empty') && filteredMarkers.length === 0)
+        $('#search').addClass('empty');
+
+    window.markerClusterer.clearMarkers();
+    window.markerClusterer.addMarkers(filteredMarkers);
+}
+
+var searchThrottle;
+function searchChanged() {
+    if (searchThrottle)
+        clearTimeout(searchThrottle);
+
+    searchThrottle = setTimeout(doSearch, 300);
 }

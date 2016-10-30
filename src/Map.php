@@ -24,6 +24,8 @@ class Map {
         $jsonTypes = json_encode($types);
         $jsonSources = json_encode($config['sources']);
 
+        $search = '<input type="search" id="search" placeholder="' . Translate::t('Search') . '">';
+
         $legendItems = array();
         foreach ($types as $type) {
             $legendItems[] = '<li><img src="' . $type['legendIcon'] . '" style="width: ' . $type['legendSize'][0] . 'px; height: ' . $type['legendSize'][1] . 'px;"> <span>' . htmlentities($type['label']) . '</span></li>';
@@ -37,31 +39,17 @@ class Map {
 
         $ret = <<<HTML
 <div id="map"></div>
+$search
 $legend
 $credit
 <script src="js/markerclusterer.js"></script>
+<script src="js/jquery.friendly_id.js"></script>
 <script src="js/script.js"></script>
 <script>
     var Map = {
         types: $jsonTypes,
         sources: $jsonSources,
     };
-    
-    function toggleLegend() {
-        var legend = document.getElementById('legend');
-        
-        if (!legend.hasAttribute('data-content')) {
-            legend.setAttribute('data-content', legend.innerHTML);
-        }
-        
-        if (legend.className == 'collapsed') {
-            legend.className = '';
-            legend.innerHTML = legend.getAttribute('data-content');
-        } else {
-            legend.className = 'collapsed';
-            legend.innerHTML = '?';
-        }
-    }
     
     function initMap() {
         Map.map = new google.maps.Map(document.getElementById('map'), {
@@ -71,6 +59,12 @@ $credit
                 lng: {$config['map']['center']['longitude']}
             }
         });
+        
+        var search = document.getElementById('search');
+        search.onchange = searchChanged;
+        search.onkeyup = searchChanged;
+        search.onsearch = searchChanged;
+        Map.map.controls[google.maps.ControlPosition.RIGHT_TOP].push(search);
         
         var legend = document.getElementById('legend');
         legend.onclick = toggleLegend;
@@ -86,8 +80,8 @@ $credit
         });
         
         var points = $jsonPoints;
-        var markers = points.map(processPoint);
-        new MarkerClusterer(Map.map, markers, {imagePath: 'img/clusters/m', maxZoom: 17});
+        window.allMarkers = points.map(processPoint);
+        window.markerClusterer = new MarkerClusterer(Map.map, window.allMarkers, {imagePath: 'img/clusters/m', maxZoom: 17});
     }
 </script>
 <script async defer

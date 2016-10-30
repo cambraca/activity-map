@@ -11,6 +11,7 @@ require_once 'src/Autoloader.php';
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <title><?php echo $config['title']; ?></title>
     <link rel="stylesheet" href="css/styles.css">

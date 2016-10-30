@@ -4,12 +4,28 @@ class Map {
     public static function generate() {
         global $config;
 
-        $jsonPoints = json_encode(self::getPoints());
-        $jsonTypes = json_encode($config['types']);
+        $points = self::getPoints();
+        $typesUsed = array();
+        foreach ($points as $point) {
+            $typesUsed[$point[3]] = TRUE;
+        }
+        $jsonPoints = json_encode($points);
+
+        $types = $config['types'];
+        foreach (array_keys($types) as $type) {
+            if (!array_key_exists($type, $typesUsed)) {
+                unset($types[$type]);
+            }
+        }
+        if (!$types) {
+            $types = $config['types'];
+        }
+
+        $jsonTypes = json_encode($types);
         $jsonSources = json_encode($config['sources']);
 
         $legendItems = array();
-        foreach ($config['types'] as $type) {
+        foreach ($types as $type) {
             $legendItems[] = '<li><img src="' . $type['legendIcon'] . '" style="width: ' . $type['legendSize'][0] . 'px; height: ' . $type['legendSize'][1] . 'px;"> <span>' . htmlentities($type['label']) . '</span></li>';
         }
         $legend = '<ul id="legend">' . implode('', $legendItems) . '</ul>';
@@ -129,8 +145,8 @@ HTML;
             }
 
             if ($direction_index > 0) {
-                $point[1] += ($distance * $direction[0] * .00001);
-                $point[2] += ($distance * $direction[1] * .00001);
+                $point[1] += ($distance * $direction[0] * .00003);
+                $point[2] += ($distance * $direction[1] * .00003);
             }
 
             $lat = round($point[1], 5);

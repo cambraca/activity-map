@@ -10,7 +10,10 @@ function processPoint(point) {
         title: Map.sources[point[0]].label
     });
 
-    marker.searchData = $.friendly_id(point[4]); // Date
+    marker.type = point[3];
+
+    marker.searchData = $.friendly_id(Map.sources[point[0]].label); // Source title
+    marker.searchData += ' ' + $.friendly_id(point[4]); // Date
     for (var key in point[5]) {
         marker.searchData += ' ' + $.friendly_id(point[5][key]); // Extra data
     }
@@ -60,12 +63,30 @@ function toggleLegend() {
     if (legend.className == 'collapsed') {
         legend.className = '';
         legend.innerHTML = legend.getAttribute('data-content');
+        updateLegendCounts();
     } else {
         legend.className = 'collapsed';
         legend.innerHTML = '?';
     }
 }
 
+function updateLegendCounts() {
+    var legend = $('#legend');
+    if (legend.hasClass('collapsed'))
+        return;
+
+    var counts = {};
+    window.markerClusterer.getMarkers().map(function(marker) {
+        if (typeof counts[marker.type] === 'undefined')
+            counts[marker.type] = 0;
+        counts[marker.type]++;
+    });
+
+    $('li[data-type]', legend).each(function() {
+        var type = $(this).attr('data-type');
+        $('i', this).text('(' + (typeof counts[type] === 'undefined' ? 0 : counts[type]) + ')');
+    });
+}
 
 function doSearch() {
     var query = $.friendly_id(document.getElementById('search').value.trim());
@@ -81,6 +102,7 @@ function doSearch() {
 
     window.markerClusterer.clearMarkers();
     window.markerClusterer.addMarkers(filteredMarkers);
+    updateLegendCounts();
 }
 
 var searchThrottle;

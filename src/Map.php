@@ -27,8 +27,8 @@ class Map {
         $search = '<input type="search" id="search" placeholder="' . Translate::t('Search') . '">';
 
         $legendItems = array();
-        foreach ($types as $type) {
-            $legendItems[] = '<li><img src="' . $type['legendIcon'] . '" style="width: ' . $type['legendSize'][0] . 'px; height: ' . $type['legendSize'][1] . 'px;"> <span>' . htmlentities($type['label']) . '</span></li>';
+        foreach ($types as $key => $type) {
+            $legendItems[] = '<li data-type="' . $key . '"><img src="' . $type['legendIcon'] . '" style="width: ' . $type['legendSize'][0] . 'px; height: ' . $type['legendSize'][1] . 'px;"> <span>' . htmlentities($type['label']) . ' <i>(0)</i></span></li>';
         }
         $legend = '<ul id="legend">' . implode('', $legendItems) . '</ul>';
 
@@ -82,6 +82,7 @@ $credit
         var points = $jsonPoints;
         window.allMarkers = points.map(processPoint);
         window.markerClusterer = new MarkerClusterer(Map.map, window.allMarkers, {imagePath: 'img/clusters/m', maxZoom: 17});
+        updateLegendCounts();
     }
 </script>
 <script async defer

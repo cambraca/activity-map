@@ -13,6 +13,7 @@ function processPoint(point) {
     marker.type = point[3];
 
     marker.searchData = $.friendly_id(Map.sources[point[0]].label); // Source title
+    marker.searchData += ' ' + $.friendly_id(Map.types[point[3]].label); // Type
     marker.searchData += ' ' + $.friendly_id(point[4]); // Date
     for (var key in point[5]) {
         marker.searchData += ' ' + $.friendly_id(point[5][key]); // Extra data

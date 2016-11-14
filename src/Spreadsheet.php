@@ -96,7 +96,11 @@ class Spreadsheet {
                     break;
                 case $this->toHeader(Translate::t('Latitude')):
                 case $this->toHeader(Translate::t('Longitude')):
-                    $point[] = doubleval($row['gsx$' . $field]['$t']);
+                    $value = $row['gsx$' . $field]['$t'];
+                    if ($value === '') {
+                        return NULL;
+                    }
+                    $point[] = doubleval($value);
                     break;
                 case $this->toHeader(Translate::t('Date')):
                     $date = $row['gsx$' . $field]['$t'];
